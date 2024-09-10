@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import axios from "axios";
 import winston from "winston";
-import { getProfiles } from "./getting-profiles";
+import { getProfiles } from "../../../getting-profiles";
 dotenv.config();
 
 const app = express();
