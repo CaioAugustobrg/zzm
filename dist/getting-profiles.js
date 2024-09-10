@@ -17,14 +17,11 @@ const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const axios_1 = __importDefault(require("axios"));
 const winston_1 = __importDefault(require("winston"));
-// Configura variáveis de ambiente
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const API_KEY = process.env.API_KEY || "e30d320a165c400f1ef974619fe1ae26";
-const API_PORT = process.env.API_PORT || 50555; // Substitua se necessário
+const API_PORT = process.env.API_PORT || 50555;
 const apiUrl = 'http://local.adspower.net:50333/api/v1/user/list';
-// const userId = 'kj4eo7w';
-// Configura o logger
 const logger = winston_1.default.createLogger({
     level: 'info',
     format: winston_1.default.format.combine(winston_1.default.format.timestamp(), winston_1.default.format.json()),
@@ -45,7 +42,7 @@ function getProfiles() {
                     'Accept': 'application/json'
                 }
             });
-            logger.info('Recieved data:', { data: response.data });
+            logger.info('\n Recieved PROFILE data:', { data: response.data });
         }
         catch (error) {
             logger.error('GET requisition failed:', {
