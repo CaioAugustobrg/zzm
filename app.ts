@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import axios from "axios";
 import winston from "winston";
 import { getProfiles } from "./getting-profiles";
+import { getGroups } from "./getting-groups";
 dotenv.config();
 
 const app = express();
@@ -52,6 +53,7 @@ app.listen(3000, () => {
   console.log(`Server running at PORT: ${3000}`);
   getData(); 
   getProfiles()
+  getGroups()
 }).on("error", (error) => {
   console.error('Server startup error:', error.message);
 });
