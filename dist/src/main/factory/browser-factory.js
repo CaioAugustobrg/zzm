@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.browserController = void 0;
+const close_browser_1 = require("../../application/usecases/close-browser");
+const open_browser_1 = require("../../application/usecases/open-browser");
+const browser_controller_1 = require("../../presentation/controllers/browser-controller");
+const openProfileUseCase = new open_browser_1.OpenBrowserUseCase();
+const closeBrowserUseCase = new close_browser_1.CloseBrowserUseCase();
+const browserController = new browser_controller_1.BrowserController(openProfileUseCase, closeBrowserUseCase);
+exports.browserController = browserController;

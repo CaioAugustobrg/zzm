@@ -7,7 +7,7 @@ dotenv.config();
 
 const app = express();
 const API_KEY = process.env.API_KEY || "e30d320a165c400f1ef974619fe1ae26";
-const API_PORT = process.env.API_PORT || 50555;
+const API_PORT = process.env.API_PORT || 50556;
 const apiUrl = 'http://local.adspower.net:50333/api/v1/group/list';
 
 

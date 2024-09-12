@@ -1,16 +1,20 @@
+import puppeteer from 'puppeteer';
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import axios from "axios";
 import winston from "winston";
-import { getProfiles } from "../../../getting-profiles";
+import router from "../routes";
+import bodyParser from 'body-parser'
+import { GetProfilesIdsByUser } from '../../application/usecases/get-profile-ids-by-user';
 dotenv.config();
 
 const app = express();
 const API_KEY = process.env.API_KEY || "e30d320a165c400f1ef974619fe1ae26";
 const API_PORT = process.env.API_PORT || 50555;
-const apiUrl = 'http://local.adspower.net:50333/api/v1/browser/start';
+const apiUrl = 'http://local.adspower.net:50325/api/v1/browser/start';
 const userId = 'kkh2f1e';
-
+app.use(bodyParser.json())
+app.use(express.json())
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
@@ -26,7 +30,7 @@ const logger = winston.createLogger({
 app.get("/", (request: Request, response: Response) => {
   response.status(200).send("Hello World");
 });
-
+app.use(router)
 async function getData() {
   try {
     const url = `${apiUrl}?user_id=${userId}`;
@@ -38,7 +42,7 @@ async function getData() {
       }
     });
 
-    logger.info('Dados recebidos:', { data: response.data });
+    logger.info('recieved data:', { data: response.data });
   } catch (error: any) {
     logger.error('GET requisition failed:', {
       message: error.message,
@@ -48,10 +52,15 @@ async function getData() {
   }
 }
 
-app.listen(3000, () => {
+app.listen(3000, async () => {
   console.log(`Server running at PORT: ${3000}`);
-  getData(); 
-  getProfiles()
+
+  // Or import puppeteer from 'puppeteer-core';
+  
+  // Launch the browser and open a new blank page
+ 
+//  getData(); 
+//  getProfiles()
 }).on("error", (error) => {
   console.error('Server startup error:', error.message);
 });

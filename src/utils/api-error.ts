@@ -21,7 +21,6 @@ export default class ApiError extends Error {
     this.logStack = error.logStack ?? false;
     this.log = error.log ?? false;
 
-    // Log the error using Winston
     if (this.log) {
       logger.error(`Error Code: ${this.code}, Message: ${this.message}`);
       if (this.logStack) {
