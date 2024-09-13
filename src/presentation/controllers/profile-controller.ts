@@ -13,9 +13,12 @@ import { CloseBrowserUseCase } from "../../application/usecases/close-browser";
 import { BrowserController } from "./browser-controller";
 import puppeteer from 'puppeteer'
 import path from 'path'
+import {exec} from 'child_process'
+
 function delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
 export class ProfileController {
     browserController: BrowserController;
     constructor(
@@ -41,7 +44,6 @@ export class ProfileController {
                 page_size
             } = request.body;
             console.log('User ID:', user_id);
-
 
             const result = await this.findProfileUseCase.handle(request.body);
 
@@ -69,76 +71,87 @@ export class ProfileController {
         }
     }
 
-
-
     async findAllProfiles(request: Request, response: Response) {
         try {
             const getProfilesIdsByUser = new GetProfilesIdsByUser();
             const userIds = await getProfilesIdsByUser.handle();
-
             const ids = userIds.userIds;
-
+    
             for (const userId of ids) {
+                console.log('User ID:', userId);
+    
                 try {
                     const data = await this.browserController.OpenBrowser(userId);
                     console.log('OpenBrowser response data:', data.data.ws.puppeteer);
-
-
-
-
-                    (async () => {
-                        try {
-                            const puppeteerUrl = data.data.ws.puppeteer
-                            const browser = await puppeteer.connect({
-                                browserWSEndpoint: puppeteerUrl,
-                            });
-                            const extensionPath = path.resolve('C:/ADSPOWER GLOBAL/ext/1022642');
-
-                          //  await puppeteer.launch({
-                          //      headless: false,
-                          //      args: [
-                          //          `--disable-extensions-except=${extensionPath}`,
-                          //          `--load-extension=${extensionPath}`
-                          //      ]
-                          //  })
-                            const pages = await browser.pages();
-                            console.log(pages.length)
-                          const targetPage = pages[0];
-                            await targetPage.bringToFront();
-                           //   if (pages.length > 1) {
-                           //     if (pages.length > 1) {
-                           //       await pages[0].close();
-                           //       console.log('Aba na posição 2 fechada');
-                           //     }
-                            //  }
-                             delay(1000)
-                              await targetPage.locator('.r-4qtqp9 r-yyyyoo r-dnmrzs r-bnwqim r-lrvibr r-m6rgpd r-1xvli5t r-1hdv0qi').click();
-
-                            //  if (pages.length > 0) {
-                            //     await pages[0].close();
-                            //    console.log('Aba na posição 1 fechada');
-                            // }
-                            // }
-                        } catch (error) {
-                            console.error('Failed to connect to browser:', error);
-                        }
-                    })().catch((error) => {
-                        console.log(error)
+                    const puppeteerUrl = data.data.ws.puppeteer;
+    
+                    const browser = await puppeteer.connect({
+                        browserWSEndpoint: puppeteerUrl,
                     });
-
-                    //  await new Promise(resolve => setTimeout(resolve, 1500));
-
-                    // Feche o navegador
+    
+                    const pages = await browser.pages();
+                    console.log('Number of pages:', pages.length);
+    
+                    let targetPage, targetPage2;
+                    if (pages.length > 1) {
+                        targetPage = pages[1];
+                        targetPage2 = pages[0];
+                    } else if (pages.length > 0) {
+                        targetPage = pages[0];
+                    } else {
+                        console.log('No pages found.');
+                        continue;
+                    }
+    
+                    const handlePage = async (page: any) => {
+                        const pageURL = page.url();
+                        if (pageURL.startsWith('https://x')) {
+                            console.log('URL found:', pageURL);
+    
+                            const screenSize = await page.evaluate(() => ({
+                                width: window.screen.width,
+                                height: window.screen.height,
+                                availWidth: window.screen.availWidth,
+                                availHeight: window.screen.availHeight
+                            }));
+                            console.log('Screen Size:', screenSize);
+    
+                            await page.setViewport({ width: screenSize.width, height: screenSize.height });
+                            await page.bringToFront();
+                            await console.log(page.url())
+    
+                            const selector = 'input.MuiSwitch-input.css-q7japm';
+                            await page.waitForSelector(selector);
+                          
+                            const isChecked = await page.evaluate((selector: any) => {
+                                const element = document.querySelector(selector) as HTMLInputElement;
+                                return element ? element.checked : false; 
+                            }, selector);
+    
+                            console.log('Checked:', isChecked);
+                            if (isChecked === false) {
+                                await page.click(selector);
+                                await page.click('#\\:re\\:');
+                            }           
+                        }
+                    };
+    
+                    if (targetPage) await handlePage(targetPage);
+                    if (targetPage2) await handlePage(targetPage2);
+    
+                    await new Promise(resolve => setTimeout(resolve, 5000));
                     // await this.browserController.CloseBrowser(userId);
+    
                 } catch (error: any) {
                     logger.error(`Error processing userId ${userId}:`, { error: error.message });
                 }
             }
-
+    
             return response.status(200).json({ message: 'Process completed successfully' });
         } catch (error: any) {
             logger.error('Unexpected error:', { error: error.message });
             return response.status(500).json({ message: 'Internal server error' });
         }
     }
+    
 }

@@ -21,11 +21,8 @@ class GetProfilesIdsByUser {
     }
     async handle() {
         try {
-            // Pergunta ao usuário por IDs separados por espaço
             const idsInput = await this.askQuestion('Por favor, insira os IDs separados por espaço: ');
-            // Divide os IDs por espaço e remove espaços em branco adicionais
-            const ids = idsInput.split(/\s+/).map(id => id.trim()).filter(id => id.length > 0);
-            // Cria uma instância de User com os IDs
+            const ids = idsInput.trim().split(/\s+/).filter(id => id.length > 0);
             const userIds = new user_1.User(ids);
             console.log('User IDs:', userIds);
             return userIds;
@@ -35,7 +32,6 @@ class GetProfilesIdsByUser {
             throw error;
         }
         finally {
-            // Fecha a interface readline
             rl.close();
         }
     }

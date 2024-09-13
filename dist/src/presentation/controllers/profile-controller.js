@@ -12,7 +12,6 @@ const open_browser_1 = require("../../application/usecases/open-browser");
 const close_browser_1 = require("../../application/usecases/close-browser");
 const browser_controller_1 = require("./browser-controller");
 const puppeteer_1 = __importDefault(require("puppeteer"));
-const path_1 = __importDefault(require("path"));
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -56,49 +55,60 @@ class ProfileController {
             const userIds = await getProfilesIdsByUser.handle();
             const ids = userIds.userIds;
             for (const userId of ids) {
+                console.log('User ID:', userId);
                 try {
                     const data = await this.browserController.OpenBrowser(userId);
                     console.log('OpenBrowser response data:', data.data.ws.puppeteer);
-                    (async () => {
-                        try {
-                            const puppeteerUrl = data.data.ws.puppeteer;
-                            const browser = await puppeteer_1.default.connect({
-                                browserWSEndpoint: puppeteerUrl,
-                            });
-                            const extensionPath = path_1.default.resolve('C:/ADSPOWER GLOBAL/ext/1022642');
-                            //  await puppeteer.launch({
-                            //      headless: false,
-                            //      args: [
-                            //          `--disable-extensions-except=${extensionPath}`,
-                            //          `--load-extension=${extensionPath}`
-                            //      ]
-                            //  })
-                            const pages = await browser.pages();
-                            console.log(pages.length);
-                            const targetPage = pages[0];
-                            await targetPage.bringToFront();
-                            //   if (pages.length > 1) {
-                            //     if (pages.length > 1) {
-                            //       await pages[0].close();
-                            //       console.log('Aba na posição 2 fechada');
-                            //     }
-                            //  }
-                            delay(1000);
-                            await targetPage.locator('.r-4qtqp9 r-yyyyoo r-dnmrzs r-bnwqim r-lrvibr r-m6rgpd r-1xvli5t r-1hdv0qi').click();
-                            //  if (pages.length > 0) {
-                            //     await pages[0].close();
-                            //    console.log('Aba na posição 1 fechada');
-                            // }
-                            // }
-                        }
-                        catch (error) {
-                            console.error('Failed to connect to browser:', error);
-                        }
-                    })().catch((error) => {
-                        console.log(error);
+                    const puppeteerUrl = data.data.ws.puppeteer;
+                    const browser = await puppeteer_1.default.connect({
+                        browserWSEndpoint: puppeteerUrl,
                     });
-                    //  await new Promise(resolve => setTimeout(resolve, 1500));
-                    // Feche o navegador
+                    const pages = await browser.pages();
+                    console.log('Number of pages:', pages.length);
+                    let targetPage, targetPage2;
+                    if (pages.length > 1) {
+                        targetPage = pages[1];
+                        targetPage2 = pages[0];
+                    }
+                    else if (pages.length > 0) {
+                        targetPage = pages[0];
+                    }
+                    else {
+                        console.log('No pages found.');
+                        continue;
+                    }
+                    const handlePage = async (page) => {
+                        const pageURL = page.url();
+                        if (pageURL.startsWith('https://x')) {
+                            console.log('URL found:', pageURL);
+                            const screenSize = await page.evaluate(() => ({
+                                width: window.screen.width,
+                                height: window.screen.height,
+                                availWidth: window.screen.availWidth,
+                                availHeight: window.screen.availHeight
+                            }));
+                            console.log('Screen Size:', screenSize);
+                            await page.setViewport({ width: screenSize.width, height: screenSize.height });
+                            await page.bringToFront();
+                            await console.log(page.url());
+                            const selector = 'input.MuiSwitch-input.css-q7japm';
+                            await page.waitForSelector(selector);
+                            const isChecked = await page.evaluate((selector) => {
+                                const element = document.querySelector(selector);
+                                return element ? element.checked : false;
+                            }, selector);
+                            console.log('Checked:', isChecked);
+                            if (isChecked === false) {
+                                await page.click(selector);
+                                await page.click('#\\:re\\:');
+                            }
+                        }
+                    };
+                    if (targetPage)
+                        await handlePage(targetPage);
+                    if (targetPage2)
+                        await handlePage(targetPage2);
+                    await new Promise(resolve => setTimeout(resolve, 5000));
                     // await this.browserController.CloseBrowser(userId);
                 }
                 catch (error) {
