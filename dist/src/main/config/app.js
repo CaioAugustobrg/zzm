@@ -49,7 +49,7 @@ async function getData() {
     }
 }
 app.listen(3000, async () => {
-    console.log(`Server running at PORT: ${3000}`);
+    // console.log(`Server running at PORT: ${3000}`);
     // Or import puppeteer from 'puppeteer-core';
     // Launch the browser and open a new blank page
     //  getData(); 

@@ -9,12 +9,11 @@ class CloseBrowserUseCase {
         //if (!profile) {
         //   return new ApiError({
         //      code: 404,
-        //     message: "Profile not found",
+        //     message: "Profile not found",AC
         //    log: true,
         //});
         // }
         const url = browser.toUrl("http://local.adspower.net:50555/api/v1/browser/stop");
-        console.log('Generated URL CLOSE BROWSER:', url);
         return url;
     }
 }

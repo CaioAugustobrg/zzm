@@ -1,5 +1,5 @@
-import { User } from "../../domain/entities/user";
 import readline from 'readline';
+import { User } from '../../domain/entities/user';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -11,7 +11,7 @@ export class GetProfilesIdsByUser {
 
   private askQuestion(query: string): Promise<string> {
     return new Promise((resolve) => {
-      rl.question(query, (answer) => {
+      rl.question(query, (answer: string | PromiseLike<string>) => {
         resolve(answer);
       });
     });
@@ -19,18 +19,17 @@ export class GetProfilesIdsByUser {
 
   async handle(): Promise<User> {
     try {
-      const idsInput = await this.askQuestion('Por favor, insira os IDs separados por espaço: ');
+      const idsInput = await this.askQuestion('Please enter the IDs separated by spaces: ');
       const ids = idsInput.trim().split(/\s+/).filter(id => id.length > 0);
       const userIds = new User(ids);
-      console.log('User IDs:', userIds);
-  
       return userIds;
     } catch (error) {
       console.error('Erro ao fazer a pergunta:', error);
       throw error;
-    } finally {
-      rl.close(); 
     }
   }
-  
+
+  close() {
+    rl.close();
+  }
 }

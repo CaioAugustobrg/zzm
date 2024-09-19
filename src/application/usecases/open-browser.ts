@@ -20,9 +20,6 @@ export class OpenBrowserUseCase {
 
 
        const url = browser.toUrl("http://local.adspower.net:50555/api/v1/browser/start");
-
-        console.log('Generated URL OPEN BROWSER:', url);
-
         return url;
     }
 }

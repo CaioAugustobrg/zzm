@@ -20,9 +20,6 @@ export class CloseBrowserUseCase {
 
 
        const url = browser.toUrl("http://local.adspower.net:50555/api/v1/browser/stop");
-
-       console.log('Generated URL CLOSE BROWSER:', url);
-
         return url;
     }
 }

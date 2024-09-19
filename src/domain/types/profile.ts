@@ -22,3 +22,7 @@ export interface ProfileParameters {
     msg: string;
   }
   
+  export interface NotRunningProfile {
+    profileId: string; 
+    url: string;
+}

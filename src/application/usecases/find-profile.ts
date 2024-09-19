@@ -19,9 +19,6 @@ export class FindProfileUseCase {
 
 
        const url = profile.toUrl("http://local.adspower.net:50555/api/v1/user/list");
-
-        console.log('Generated URL:', url);
-
         return url;
     }
 }

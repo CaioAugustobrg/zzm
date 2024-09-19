@@ -12,9 +12,11 @@ router.post("/profile", async (request, response) => {
     console.log(request.body);
     return await profile_factory_1.profileController.findProfile(request, response);
 });
-router.get("/all-profiles", async (request, response) => {
-    return await profile_factory_1.profileController.findAllProfiles(request, response);
-});
+//router.get("/all-profiles",
+// async (request: Request, response: Response) => {
+//     return await profileController.findAllProfiles()
+//   }
+//)
 //router.get("/open-browser", 
 //    async (request: Request, response: Response) => {
 //        console.log(request.body)
