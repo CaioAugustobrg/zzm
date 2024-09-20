@@ -5,7 +5,7 @@ export interface OpenBrowserParameters {
     ip_tab?: number;
     new_first_tab?: number;
     launch_args?: string[];
-    headless?: number;
+    headless?: false;
     disable_password_filling?: number;
     clear_cache_after_closing?: number;
     enable_password_saving?: number;

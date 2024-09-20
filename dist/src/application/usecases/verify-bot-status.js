@@ -27,9 +27,9 @@ class PageHandler {
                 console.log(`User ${userId} not running. Checkboxes status - isChecked: ${isChecked}, isChatBtnChecked: ${isChatBtnChecked}`);
                 return userId;
             }
-            await this.page.waitForSelector('.css-146c3p1[data-testid="tweetText"]'); // Seletor CSS
+            //        await this.page.waitForSelector('.css-146c3p1[data-testid="tweetText"]'); // Seletor CSS
             // Clique no elemento
-            await this.page.click('.css-146c3p1[data-testid="tweetText"]');
+            //await this.page.click('.css-146c3p1[data-testid="tweetText"]');
             console.log(`User ${userId} is running.`);
             return 'running ok';
         }

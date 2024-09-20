@@ -14,7 +14,7 @@ class BrowserManager {
             headless: false,
             args: [
                 `--disable-extensions-except=${this.extensionPath}`,
-                `--load-extension=${this.extensionPath}`
+                `--load-extension=${this.extensionPath}`,
             ]
         });
         this.page = await this.browser.newPage();

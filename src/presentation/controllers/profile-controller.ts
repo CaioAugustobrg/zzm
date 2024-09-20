@@ -72,6 +72,7 @@ export class ProfileController {
     }
     
     async findAllProfiles(userIds: string[]) {
+        
         logWithColor(
             '⚠️ **Make sure the Cupid Bot extension is running on ADS POWER.**\n' +
             'If it’s not, press CTRL + C to stop, enable the extension, then run `npm start` and press ENTER.',
@@ -177,7 +178,37 @@ export class ProfileController {
             const pageURL = await browser.newPage();
             await pageURL.bringToFront();
             await pageURL.goto(targetPage, { waitUntil: 'networkidle2' });
+
+            await pageURL.setRequestInterception(true);
+
+            pageURL.on('request', request => {
+                const url = request.url();
             
+                // Aqui você pode filtrar as requisições do Cupidbot
+                if (url.includes('cupidbot')) {
+                    console.log(`Requisição do Cupidbot detectada: ${url}, ${userId}`);
+                }
+            
+                // Continuar com a requisição normalmente
+                request.continue();
+            });
+            
+            // Monitorar respostas
+            pageURL.on('response', async response => {
+                const url = response.url();
+                if (url.includes('cupidbot')) {
+                    const status = response.status();
+            
+                    try {
+                        // Tente obter a resposta como JSON
+                        const data = await response.json(); // Se não for JSON, pode usar response.text()
+                        console.log('Status Code:', status, userId);
+                        console.log('Response:', data);
+                    } catch (error: any) {
+                        console.error(`Erro ao processar resposta para ${url}: ${error.message}`);
+                    }
+                }
+            });
             let verifyCupidBot = new PageHandler(pageURL);
             const response = await verifyCupidBot.handlePage(targetPage, userId);
     
@@ -232,7 +263,7 @@ export class ProfileController {
     }
 }     
 
-async function callFindAllProfiles() {
+export async function callFindAllProfiles() {
     const getProfilesIdsByUser = new GetProfilesIdsByUser();
     const userProfile = new ProfileController();
 

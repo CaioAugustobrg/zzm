@@ -5,7 +5,9 @@ import axios from "axios";
 import winston from "winston";
 import router from "../routes";
 import bodyParser from 'body-parser'
+import cors  from 'cors'
 import { GetProfilesIdsByUser } from '../../application/usecases/get-profile-ids-by-user';
+import { callFindAllProfiles } from '../../presentation/controllers/profile-controller';
 dotenv.config();
 
 const app = express();
@@ -26,7 +28,12 @@ const logger = winston.createLogger({
     new winston.transports.File({ filename: 'combined.log' })
   ]
 });
-
+app.use(cors({
+  origin: 'http://localhost:5173', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'], 
+  credentials: true, 
+}));
 app.get("/", (request: Request, response: Response) => {
   response.status(200).send("Hello World");
 });
@@ -53,12 +60,12 @@ async function getData() {
 }
 
 app.listen(3000, async () => {
- // console.log(`Server running at PORT: ${3000}`);
+ console.log(`Server running at PORT: ${3000}`);
 
   // Or import puppeteer from 'puppeteer-core';
   
   // Launch the browser and open a new blank page
- 
+  await callFindAllProfiles()
 //  getData(); 
 //  getProfiles()
 }).on("error", (error) => {

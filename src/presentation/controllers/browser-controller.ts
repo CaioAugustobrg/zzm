@@ -12,8 +12,6 @@ export class BrowserController {
 
     async OpenBrowser(user_id: string): Promise<any> {
         try {
-       //     console.log('User ID:', user_id);
-
             const API_KEY = 'e30d320a165c400f1ef974619fe1ae26';
             const result = await this.openBrowserUseCase.handle(user_id);
 

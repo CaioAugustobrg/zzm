@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProfileController = void 0;
+exports.callFindAllProfiles = callFindAllProfiles;
 const get_profile_ids_by_user_1 = require("../../application/usecases/get-profile-ids-by-user");
 const logger_1 = __importDefault(require("../../utils/logger"));
 const csv_writer_1 = require("csv-writer");
@@ -17,7 +18,6 @@ const promises_1 = require("node:timers/promises");
 const close_browser_1 = require("../../application/usecases/close-browser");
 const child_process_1 = require("child_process");
 const path_1 = __importDefault(require("path"));
-const query_profiles_1 = require("../../application/usecases/query-profiles");
 puppeteer_extra_1.default.use((0, puppeteer_extra_plugin_stealth_1.default)());
 function ensureCsvFileExists(filePath) {
     if (!fs_1.default.existsSync(filePath)) {
@@ -62,7 +62,6 @@ class ProfileController {
         const csvFilePath = 'not_running_profiles.csv';
         let notRunningProfiles = [];
         let runningProfiles = [];
-        let notWorkingProfilesUserId = [];
         ensureCsvFileExists(csvFilePath);
         clearCsvFile(csvFilePath);
         while (true) {
@@ -104,12 +103,6 @@ class ProfileController {
                 }
                 for (const profile of notRunningProfiles) {
                     logWithColor(`Opening not running profile: ${profile.profileId}`, 'red');
-                    const queryProfiles = new query_profiles_1.QueryProfilesUseCase();
-                    queryProfiles.handle(profile.profileId).then((response) => {
-                        console.log(response);
-                    }).catch((error) => {
-                        console.log('then', error);
-                    });
                     await this.verifyProfiles(profile, userIds);
                 }
                 logWithColor(`Those who don't have the Cupid Bot on have been added to: ${csvFilePath}`, 'yellow');
@@ -154,6 +147,32 @@ class ProfileController {
             const pageURL = await browser.newPage();
             await pageURL.bringToFront();
             await pageURL.goto(targetPage, { waitUntil: 'networkidle2' });
+            await pageURL.setRequestInterception(true);
+            pageURL.on('request', request => {
+                const url = request.url();
+                // Aqui você pode filtrar as requisições do Cupidbot
+                if (url.includes('cupidbot')) {
+                    console.log(`Requisição do Cupidbot detectada: ${url}, ${userId}`);
+                }
+                // Continuar com a requisição normalmente
+                request.continue();
+            });
+            // Monitorar respostas
+            pageURL.on('response', async (response) => {
+                const url = response.url();
+                if (url.includes('cupidbot')) {
+                    const status = response.status();
+                    try {
+                        // Tente obter a resposta como JSON
+                        const data = await response.json(); // Se não for JSON, pode usar response.text()
+                        console.log('Status Code:', status, userId);
+                        console.log('Response:', data);
+                    }
+                    catch (error) {
+                        console.error(`Erro ao processar resposta para ${url}: ${error.message}`);
+                    }
+                }
+            });
             let verifyCupidBot = new verify_bot_status_1.PageHandler(pageURL);
             const response = await verifyCupidBot.handlePage(targetPage, userId);
             if (response !== 'running ok') {
