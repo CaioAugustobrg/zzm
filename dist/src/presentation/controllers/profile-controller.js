@@ -17,6 +17,7 @@ const promises_1 = require("node:timers/promises");
 const close_browser_1 = require("../../application/usecases/close-browser");
 const child_process_1 = require("child_process");
 const path_1 = __importDefault(require("path"));
+const query_profiles_1 = require("../../application/usecases/query-profiles");
 puppeteer_extra_1.default.use((0, puppeteer_extra_plugin_stealth_1.default)());
 function ensureCsvFileExists(filePath) {
     if (!fs_1.default.existsSync(filePath)) {
@@ -61,9 +62,12 @@ class ProfileController {
         const csvFilePath = 'not_running_profiles.csv';
         let notRunningProfiles = [];
         let runningProfiles = [];
+        let notWorkingProfilesUserId = [];
         ensureCsvFileExists(csvFilePath);
         clearCsvFile(csvFilePath);
         while (true) {
+            logWithColor('⚠️ **Make sure the Cupid Bot extension is running on ADS POWER.**\n' +
+                'If it’s not, press CTRL + C to stop, enable the extension, then run `npm start` and press ENTER.', 'yellow');
             try {
                 for (const userId of userIds) {
                     try {
@@ -100,6 +104,12 @@ class ProfileController {
                 }
                 for (const profile of notRunningProfiles) {
                     logWithColor(`Opening not running profile: ${profile.profileId}`, 'red');
+                    const queryProfiles = new query_profiles_1.QueryProfilesUseCase();
+                    queryProfiles.handle(profile.profileId).then((response) => {
+                        console.log(response);
+                    }).catch((error) => {
+                        console.log('then', error);
+                    });
                     await this.verifyProfiles(profile, userIds);
                 }
                 logWithColor(`Those who don't have the Cupid Bot on have been added to: ${csvFilePath}`, 'yellow');

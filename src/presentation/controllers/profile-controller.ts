@@ -88,6 +88,11 @@ export class ProfileController {
         clearCsvFile(csvFilePath);
     
         while (true) {
+              logWithColor(
+            '⚠️ **Make sure the Cupid Bot extension is running on ADS POWER.**\n' +
+            'If it’s not, press CTRL + C to stop, enable the extension, then run `npm start` and press ENTER.',
+            'yellow'
+        );
             try {
                 for (const userId of userIds) {
                     try {
