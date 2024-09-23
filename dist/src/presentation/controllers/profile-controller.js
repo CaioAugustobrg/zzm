@@ -92,6 +92,8 @@ class ProfileController {
                         }
                     }
                     catch (error) {
+                        // Adiciona o perfil ao array notRunningProfiles no caso de erro
+                        notRunningProfiles.push({ profileId: userId, url: '' });
                         console.error(`Error processing user ID ${userId}: ${error.message}`);
                         logger_1.default.error(`Error processing user ID ${userId}: ${error.stack}`);
                     }
@@ -106,11 +108,11 @@ class ProfileController {
                     await this.verifyProfiles(profile, userIds);
                 }
                 logWithColor(`Those who don't have the Cupid Bot on have been added to: ${csvFilePath}`, 'yellow');
-                logWithColor(`last: ${notRunningProfiles.length} browsers are not working`, 'red', true);
+                logWithColor(`last ${notRunningProfiles.length} browsers are not working`, 'red', true);
                 notRunningProfiles = [];
                 runningProfiles = [];
-                console.log('Waiting 1 minute before the next profile check...');
-                await (0, promises_1.setTimeout)(60000);
+                console.log('Waiting 2 minutes before the next profile check...');
+                await (0, promises_1.setTimeout)(120000);
             }
             catch (error) {
                 console.error('Error in findAllProfiles:', error.message);
@@ -122,7 +124,7 @@ class ProfileController {
     async openBrowserAndGetUrl(userId) {
         try {
             const data = await this.browserController.OpenBrowser(userId);
-            console.log('OpenBrowser response data:', data); // Log the entire response
+            //  console.log('OpenBrowser response data:', data); // Log the entire response
             if (!data || !data.data || !data.data.ws || !data.data.ws.puppeteer) {
                 throw new Error(`Invalid response structure for user ID ${userId}`);
             }
@@ -147,32 +149,6 @@ class ProfileController {
             const pageURL = await browser.newPage();
             await pageURL.bringToFront();
             await pageURL.goto(targetPage, { waitUntil: 'networkidle2' });
-            await pageURL.setRequestInterception(true);
-            pageURL.on('request', request => {
-                const url = request.url();
-                // Aqui você pode filtrar as requisições do Cupidbot
-                if (url.includes('cupidbot')) {
-                    console.log(`Requisição do Cupidbot detectada: ${url}, ${userId}`);
-                }
-                // Continuar com a requisição normalmente
-                request.continue();
-            });
-            // Monitorar respostas
-            pageURL.on('response', async (response) => {
-                const url = response.url();
-                if (url.includes('cupidbot')) {
-                    const status = response.status();
-                    try {
-                        // Tente obter a resposta como JSON
-                        const data = await response.json(); // Se não for JSON, pode usar response.text()
-                        console.log('Status Code:', status, userId);
-                        console.log('Response:', data);
-                    }
-                    catch (error) {
-                        console.error(`Erro ao processar resposta para ${url}: ${error.message}`);
-                    }
-                }
-            });
             let verifyCupidBot = new verify_bot_status_1.PageHandler(pageURL);
             const response = await verifyCupidBot.handlePage(targetPage, userId);
             if (response !== 'running ok') {

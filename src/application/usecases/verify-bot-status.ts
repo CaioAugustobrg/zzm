@@ -28,17 +28,49 @@ export class PageHandler {
                 return element ? element.checked : false;
             }, switchSelector);
 
+
+             await  await this.page.setRequestInterception(true);
+
+             await this.page.on('request', request => {
+                const url = request.url();
+            
+                // Aqui você pode filtrar as requisições do Cupidbot
+                if (url.includes('https://cupidbot-382905.uc.r.appspot.com/api/scrapedAppAccount')) {
+                    console.log(`Requisição do Cupidbot detectada: ${url}, ${userId}`);
+                }
+            
+                // Continuar com a requisição normalmente
+                request.continue();
+            });
+            
+            // Monitorar respostas
+            await this.page.on('response', async response => {
+                const url = response.url();
+                if (url.includes('cupidbot')) {
+                    const status = response.status();
+            
+                    try {
+                        const data = await response.json(); 
+                        console.log('Status Code:', status, userId);
+                        if (!isChecked || !isChatBtnChecked) {
+                            console.log(`User ${userId} not running. Checkboxes status - isChecked: ${isChecked}, isChatBtnChecked: ${isChatBtnChecked}`);
+                            return userId;
+                        }
+                        console.log('Response v sdfsdfsdf:', data);
+                    } catch (error: any) {
+                        console.error(`Erro ao processar resposta para ${url}: ${error.message}`);
+                    }
+                }
+            });
+
             // Retorna o userId se algum dos checkboxes não estiver marcado
-            if (!isChecked || !isChatBtnChecked) {
-                console.log(`User ${userId} not running. Checkboxes status - isChecked: ${isChecked}, isChatBtnChecked: ${isChatBtnChecked}`);
-                return userId;
-            }
+          
     //        await this.page.waitForSelector('.css-146c3p1[data-testid="tweetText"]'); // Seletor CSS
 
     // Clique no elemento
     //await this.page.click('.css-146c3p1[data-testid="tweetText"]');
         
-            console.log(`User ${userId} is running.`);
+            //console.log(`User ${userId} is running.`);
             return 'running ok';
 
         } catch (error: any) {

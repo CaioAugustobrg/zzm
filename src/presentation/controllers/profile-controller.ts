@@ -72,7 +72,6 @@ export class ProfileController {
     }
     
     async findAllProfiles(userIds: string[]) {
-        
         logWithColor(
             '⚠️ **Make sure the Cupid Bot extension is running on ADS POWER.**\n' +
             'If it’s not, press CTRL + C to stop, enable the extension, then run `npm start` and press ENTER.',
@@ -89,11 +88,11 @@ export class ProfileController {
         clearCsvFile(csvFilePath);
     
         while (true) {
-              logWithColor(
-            '⚠️ **Make sure the Cupid Bot extension is running on ADS POWER.**\n' +
-            'If it’s not, press CTRL + C to stop, enable the extension, then run `npm start` and press ENTER.',
-            'yellow'
-        );
+            logWithColor(
+                '⚠️ **Make sure the Cupid Bot extension is running on ADS POWER.**\n' +
+                'If it’s not, press CTRL + C to stop, enable the extension, then run `npm start` and press ENTER.',
+                'yellow'
+            );
             try {
                 for (const userId of userIds) {
                     try {
@@ -102,7 +101,8 @@ export class ProfileController {
                         const puppeteerUrl = await this.openBrowserAndGetUrl(userId);
                         const browser = await puppeteer.connect({
                             browserWSEndpoint: puppeteerUrl,
-                            defaultViewport: null                        });
+                            defaultViewport: null
+                        });
     
                         const initialResult = await this.verifyProfiles({ profileId: userId, url: puppeteerUrl }, userIds);
                         if (initialResult) {
@@ -119,6 +119,8 @@ export class ProfileController {
                         }
     
                     } catch (error: any) {
+                        // Adiciona o perfil ao array notRunningProfiles no caso de erro
+                        notRunningProfiles.push({ profileId: userId, url: '' });
                         console.error(`Error processing user ID ${userId}: ${error.message}`);
                         logger.error(`Error processing user ID ${userId}: ${error.stack}`);
                     }
@@ -129,19 +131,19 @@ export class ProfileController {
                     logWithColor(`Opening working profile: ${profile.profileId}`, 'green');
                     await this.verifyProfiles(profile, userIds);
                 }
-                
+    
                 for (const profile of notRunningProfiles) {
                     logWithColor(`Opening not running profile: ${profile.profileId}`, 'red');
                     await this.verifyProfiles(profile, userIds);
                 }
                 logWithColor(`Those who don't have the Cupid Bot on have been added to: ${csvFilePath}`, 'yellow');
-                logWithColor(`last: ${notRunningProfiles.length} browsers are not working`, 'red', true);
+                logWithColor(`last ${notRunningProfiles.length} browsers are not working`, 'red', true);
     
                 notRunningProfiles = []; 
                 runningProfiles = []; 
     
-                console.log('Waiting 1 minute before the next profile check...');
-                await setTimeout(60000); 
+                console.log('Waiting 2 minutes before the next profile check...');
+                await setTimeout(120000); 
     
             } catch (error: any) {
                 console.error('Error in findAllProfiles:', error.message);
@@ -150,10 +152,11 @@ export class ProfileController {
             }
         }
     }
+    
     private async openBrowserAndGetUrl(userId: string): Promise<string> {
         try {
             const data = await this.browserController.OpenBrowser(userId);
-            console.log('OpenBrowser response data:', data); // Log the entire response
+          //  console.log('OpenBrowser response data:', data); // Log the entire response
             if (!data || !data.data || !data.data.ws || !data.data.ws.puppeteer) {
                 throw new Error(`Invalid response structure for user ID ${userId}`);
             }
@@ -169,6 +172,7 @@ export class ProfileController {
         const twitterUrl = "https://x"
         const adsPowerUrl = "https://start"
         try {
+            
             const pages = await browser.pages();
             for (let page of pages) {
                 if (!page.url().startsWith(twitterUrl) || !page.url().startsWith(adsPowerUrl)) {
@@ -176,39 +180,11 @@ export class ProfileController {
                 }
             }
             const pageURL = await browser.newPage();
+           
             await pageURL.bringToFront();
             await pageURL.goto(targetPage, { waitUntil: 'networkidle2' });
 
-            await pageURL.setRequestInterception(true);
-
-            pageURL.on('request', request => {
-                const url = request.url();
-            
-                // Aqui você pode filtrar as requisições do Cupidbot
-                if (url.includes('cupidbot')) {
-                    console.log(`Requisição do Cupidbot detectada: ${url}, ${userId}`);
-                }
-            
-                // Continuar com a requisição normalmente
-                request.continue();
-            });
-            
-            // Monitorar respostas
-            pageURL.on('response', async response => {
-                const url = response.url();
-                if (url.includes('cupidbot')) {
-                    const status = response.status();
-            
-                    try {
-                        // Tente obter a resposta como JSON
-                        const data = await response.json(); // Se não for JSON, pode usar response.text()
-                        console.log('Status Code:', status, userId);
-                        console.log('Response:', data);
-                    } catch (error: any) {
-                        console.error(`Erro ao processar resposta para ${url}: ${error.message}`);
-                    }
-                }
-            });
+          
             let verifyCupidBot = new PageHandler(pageURL);
             const response = await verifyCupidBot.handlePage(targetPage, userId);
     
