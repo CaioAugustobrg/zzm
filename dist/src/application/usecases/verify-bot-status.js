@@ -22,42 +22,42 @@ class PageHandler {
                 const element = document.querySelector(switchSelector);
                 return element ? element.checked : false;
             }, switchSelector);
-            await await this.page.setRequestInterception(true);
-            await this.page.on('request', request => {
-                const url = request.url();
-                // Aqui você pode filtrar as requisições do Cupidbot
-                if (url.includes('https://cupidbot-382905.uc.r.appspot.com/api/scrapedAppAccount')) {
-                    console.log(`Requisição do Cupidbot detectada: ${url}, ${userId}`);
-                }
-                // Continuar com a requisição normalmente
-                request.continue();
-            });
+            if (isChecked === false || isChatBtnChecked === false) {
+                return userId;
+            }
+            return 'running ok';
+            //   await  await this.page.setRequestInterception(true);
+            //    await this.page.on('request', request => {
+            //       const url = request.url();
+            // Aqui você pode filtrar as requisições do Cupidbot
+            //      if (url.includes('https://cupidbot-382905.uc.r.appspot.com/api/scrapedAppAccount')) {
+            ///      }
+            // Continuar com a requisição normalmente
+            //      request.continue();
+            //   });
             // Monitorar respostas
-            await this.page.on('response', async (response) => {
-                const url = response.url();
-                if (url.includes('cupidbot')) {
-                    const status = response.status();
-                    try {
-                        // Tente obter a resposta como JSON
-                        const data = await response.json(); // Se não for JSON, pode usar response.text()
-                        console.log('Status Code:', status, userId);
-                        if (!isChecked || !isChatBtnChecked) {
-                            console.log(`User ${userId} not running. Checkboxes status - isChecked: ${isChecked}, isChatBtnChecked: ${isChatBtnChecked}`);
-                            return userId;
-                        }
-                        console.log('Response v sdfsdfsdf:', data);
-                    }
-                    catch (error) {
-                        console.error(`Erro ao processar resposta para ${url}: ${error.message}`);
-                    }
-                }
-            });
+            //   await this.page.on('response', async response => {
+            //       const url = response.url();
+            //       if (url.includes('cupidbot')) {
+            //           const status = response.status();
+            //        try {
+            //            const data = await response.json(); 
+            //            console.log('Status Code:', status, userId);
+            //            if (!isChecked || !isChatBtnChecked) {
+            //                console.log(`User ${userId} not running. Checkboxes status - isChecked: ${isChecked}, isChatBtnChecked: ${isChatBtnChecked}`);
+            //               return userId;
+            //            }
+            //            console.log('Response v sdfsdfsdf:', data);
+            //        } catch (error: any) {
+            //            console.error(`Erro ao processar resposta para ${url}: ${error.message}`);
+            //        }
+            //    }
+            //    });
             // Retorna o userId se algum dos checkboxes não estiver marcado
             //        await this.page.waitForSelector('.css-146c3p1[data-testid="tweetText"]'); // Seletor CSS
             // Clique no elemento
             //await this.page.click('.css-146c3p1[data-testid="tweetText"]');
             //console.log(`User ${userId} is running.`);
-            return 'running ok';
         }
         catch (error) {
             console.error(`Error handling page for user ${userId}: ${error.message}`);

@@ -10,7 +10,7 @@ const winston_1 = __importDefault(require("winston"));
 const routes_1 = __importDefault(require("../routes"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const cors_1 = __importDefault(require("cors"));
-const profile_controller_1 = require("../../presentation/controllers/profile-controller");
+//import { callFindAllProfiles } from '../../presentation/controllers/profile-controller';
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const API_KEY = process.env.API_KEY || "e30d320a165c400f1ef974619fe1ae26";
@@ -28,7 +28,7 @@ const logger = winston_1.default.createLogger({
     ]
 });
 app.use((0, cors_1.default)({
-    origin: 'http://localhost:5173',
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     credentials: true,
@@ -56,11 +56,11 @@ async function getData() {
         });
     }
 }
-app.listen(3000, async () => {
-    console.log(`Server running at PORT: ${3000}`);
+app.listen(3030, async () => {
+    console.log(`Server running at PORT: ${3030}`);
     // Or import puppeteer from 'puppeteer-core';
     // Launch the browser and open a new blank page
-    await (0, profile_controller_1.callFindAllProfiles)();
+    //await callFindAllProfiles()
     //  getData(); 
     //  getProfiles()
 }).on("error", (error) => {

@@ -1,29 +1,31 @@
-import express, { request, response, type Request, type Response } from 'express'
-import { profileController } from '../factory/profile-factory'
-import { browserController } from '../factory/browser-factory'
+import express, { Request, Response } from 'express';
+import { ProfileController } from '../../presentation/controllers/profile-controller';
+import { GetProfilesIdsByUser } from '../../application/usecases/get-profile-ids-by-user';
 
-const router = express.Router()
+const router = express.Router();
 
-//router.post("/profile",
-  //  async (request: Request, response: Response) => {
-        //        console.log(request)
-        //        console.log('ROUTE', response)
-    //    console.log(request.body)
-      //  return await profileController.findProfile(request, response)
 
-  //  }//
-//)
+const profileController = new ProfileController();
+const getProfilesIdsByUser = new GetProfilesIdsByUser();
 
-//router.get("/all-profiles",
-   // async (request: Request, response: Response) => {
-   //     return await profileController.findAllProfiles()
- //   }
-//)
 
-//router.get("/open-browser", 
-//    async (request: Request, response: Response) => {
-//        console.log(request.body)
-//        return await browserController.OpenBrowser(request, response)
-//    }
-//)
+router.post('/get-profiles', async (request: Request, response: Response) => {
+    try {
+
+        const idsInput = request.body.profilesId; 
+        const socialMedia = request.body.socialMedia
+        console.log(idsInput, socialMedia)
+
+        const userIds = await getProfilesIdsByUser.handle(idsInput);
+        
+
+        let notWorkingProfiles = await profileController.findAllProfiles(userIds.userIds, socialMedia);
+            console.log('notWorkingProfiles',notWorkingProfiles)
+        response.status(200).json({ message: 'Profiles processed successfully',  notWorkingProfiles});
+    } catch (error: any) {
+        console.error('Error calling findAllProfiles:', error.message);
+        response.status(500).json({ error: 'Failed to process profiles' });
+    }
+});
+
 export default router;
