@@ -112,6 +112,7 @@ export class ProfileController {
                     console.error(`Error processing user ID ${userId}: ${error.message}`);
                     logger.error(`Error processing user ID ${userId}: ${error.stack}`);
                 }
+                await setTimeout(3000)
             }
     
             return notRunningProfiles;
@@ -149,7 +150,7 @@ export class ProfileController {
             }
             const pageURL = await browser.newPage();
             await pageURL.bringToFront();
-            await pageURL.goto(targetUrl, { waitUntil: 'networkidle2' });
+            await pageURL.goto(targetUrl, { waitUntil: 'load' });
     
             let verifyCupidBot = new PageHandler(pageURL);
             const response = await verifyCupidBot.handlePage(targetUrl, userId);
@@ -159,9 +160,11 @@ export class ProfileController {
             }
         } catch (error: any) {
             notRunningProfiles.push({ profileId: userId, url: browser.wsEndpoint() });
+           // if (error.name === )
             console.error(`Error handling profile pages for user ${userId}: ${error.message}`);
             logger.error(`Error handling profile pages for user ${userId}: ${error.stack}`);
         }
+        await setTimeout(3000)
     }
     
 

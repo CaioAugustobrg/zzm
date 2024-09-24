@@ -12,6 +12,7 @@ const puppeteer_extra_1 = __importDefault(require("puppeteer-extra"));
 const puppeteer_extra_plugin_stealth_1 = __importDefault(require("puppeteer-extra-plugin-stealth"));
 const verify_bot_status_1 = require("../../application/usecases/verify-bot-status");
 const open_browser_1 = require("../../application/usecases/open-browser");
+const promises_1 = require("node:timers/promises");
 const close_browser_1 = require("../../application/usecases/close-browser");
 const child_process_1 = require("child_process");
 const path_1 = __importDefault(require("path"));
@@ -87,6 +88,7 @@ class ProfileController {
                     console.error(`Error processing user ID ${userId}: ${error.message}`);
                     logger_1.default.error(`Error processing user ID ${userId}: ${error.stack}`);
                 }
+                await (0, promises_1.setTimeout)(3000);
             }
             return notRunningProfiles;
         }
@@ -112,7 +114,7 @@ class ProfileController {
         }
     }
     async handleProfilePages(browser, socialMedia, userId, notRunningProfiles) {
-        const targetUrl = socialMedia === 'reddit' ? process.env.REDDIT_URL : process.env.TWITTER_URL; // Supondo que você tenha TWITTER_URL no .env
+        const targetUrl = socialMedia === 'reddit' ? process.env.REDDIT_URL : process.env.TWITTER_URL;
         try {
             const pages = await browser.pages();
             for (let page of pages) {
@@ -122,7 +124,7 @@ class ProfileController {
             }
             const pageURL = await browser.newPage();
             await pageURL.bringToFront();
-            await pageURL.goto(targetUrl, { waitUntil: 'networkidle2' });
+            await pageURL.goto(targetUrl, { waitUntil: 'load' });
             let verifyCupidBot = new verify_bot_status_1.PageHandler(pageURL);
             const response = await verifyCupidBot.handlePage(targetUrl, userId);
             if (response !== 'running ok') {
@@ -131,9 +133,11 @@ class ProfileController {
         }
         catch (error) {
             notRunningProfiles.push({ profileId: userId, url: browser.wsEndpoint() });
+            // if (error.name === )
             console.error(`Error handling profile pages for user ${userId}: ${error.message}`);
             logger_1.default.error(`Error handling profile pages for user ${userId}: ${error.stack}`);
         }
+        await (0, promises_1.setTimeout)(3000);
     }
     async verifyProfiles(profileInfo, ids, socialMedia) {
         let notRunningProfilesAfterVerification = [];
