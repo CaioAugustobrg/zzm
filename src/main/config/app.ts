@@ -11,7 +11,7 @@ import { GetProfilesIdsByUser } from '../../application/usecases/get-profile-ids
 dotenv.config();
 
 const app = express();
-const API_KEY = process.env.API_KEY || "e30d320a165c400f1ef974619fe1ae26";
+const API_KEY = process.env.API_KEY || "c2c3cc9a89c16e91c3126d27ed882b81";
 const API_PORT = process.env.API_PORT || 50555;
 const apiUrl = 'http://local.adspower.net:50325/api/v1/browser/start';
 const userId = 'kkh2f1e';

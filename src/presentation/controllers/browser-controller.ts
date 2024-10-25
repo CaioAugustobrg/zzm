@@ -12,7 +12,7 @@ export class BrowserController {
 
     async OpenBrowser(user_id: string): Promise<any> {
         try {
-            const API_KEY = 'e30d320a165c400f1ef974619fe1ae26';
+            const API_KEY = 'c2c3cc9a89c16e91c3126d27ed882b81';
             const result = await this.openBrowserUseCase.handle(user_id);
 
             if (typeof result === 'string') {
@@ -40,7 +40,7 @@ export class BrowserController {
         try {
 //            console.log('User close ID:', user_id);
 
-            const API_KEY = 'e30d320a165c400f1ef974619fe1ae26';
+            const API_KEY = 'c2c3cc9a89c16e91c3126d27ed882b81';
             const result = await this.closeBrowserUseCase.handle(user_id);
 
             if (typeof result === 'string') {

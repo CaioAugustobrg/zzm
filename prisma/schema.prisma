@@ -1,0 +1,207 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  model                 Model?     @relation(fields: [modelId], references: [id])
+  modelId              String?
+  role Role @relation(fields: [roleName], references: [name])
+  roleName String
+}
+
+model Role {
+  id        String   @id @default(uuid())
+  name      String @unique
+  description    String?  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt 
+  User User[]
+}
+
+
+
+model Model {
+  id               String            @id @default(uuid())
+  name             String
+  age              Int
+  birthday         DateTime
+  height           Float
+  weight           Float
+  hairColor        String?
+  shoeSize         Float?
+  ethnicity        String
+  boobSize         String?
+  pantsSize        String?
+  shirtSize        String?
+  occupation       String?
+  location         String
+  familyDetails    String?
+  relationStatus   String?
+  favFood          String?
+  hobbies          String?
+  pets             String?
+  drink            String?
+  redditAccounts   RedditAccount[]
+  snapchatAccounts SnapchatAccount[]
+  twitterAccounts  TwitterAccount[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  User User[]
+}
+
+model TwitterAccount {
+  id              String    @id @default(uuid())
+  username        String          @unique @db.VarChar(100)
+  email           String?         @db.VarChar(100)
+  password        String?         @db.VarChar(100)
+  newPassword     String?         @db.VarChar(100)
+  oldPassword     String?         @db.VarChar(100)
+  status          String?         @db.VarChar(20)
+  creationDate    DateTime?       @db.Date
+  ctaLink         String?         @db.VarChar(200)
+  state           String?         @db.VarChar(100)
+  country         String?         @db.VarChar(100)
+  city            String?         @db.VarChar(100)
+  notes           String?         @db.VarChar(200)
+  bio             String?         @db.VarChar(200)
+  profileAdsPower Int?
+  followersCount  Int?
+  totalDmsToday   Int?
+  yesterdayDms    Int?
+  cupidBot        CupidBot?
+  model           Model     @relation(fields: [modelId], references: [id])
+  modelId         String
+  proxy           String?
+  server          Server    @relation(fields: [serverId], references: [id])
+  serverId        String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model RedditAccount {
+  id                    String    @id @default(uuid())
+  proxy                 String?
+  username              String          @unique @db.VarChar(100)
+  password              String?         @db.VarChar(100)
+  status                String?         @db.VarChar(20)
+  creationDate          DateTime?       @db.Date
+  ctaLink               String?         @db.VarChar(200)
+  notes                 String?         @db.VarChar(200)
+  bio                   String?         @db.VarChar(300)
+  lastUpdated           DateTime        @default(now())
+  age                   String?         @db.VarChar(20)
+  botStatus             Boolean?
+  messageAcceptedToday  Int?
+  profileAdsPower       Int?
+  proxyChangedDate      DateTime?       @db.Date
+  startPostingDate      DateTime?       @db.Date
+  state                 String?         @db.VarChar(100)
+  todayCommentKarma     Int?
+  yesterdayCommentKarma Int?
+  cupidBot              CupidBot?
+  model                 Model     @relation(fields: [modelId], references: [id])
+  modelId               String
+  server                Server    @relation(fields: [serverId], references: [id])
+  serverId              String
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model SnapchatAccount {
+  id              String    @id @default(uuid())
+  proxy           String?
+  username        String          @unique @db.VarChar(100)
+  email           String?         @db.VarChar(100)
+  emailPassword   String?         @db.VarChar(100)
+  password        String?         @db.VarChar(100)
+  status          String?         @db.VarChar(20)
+  ctaLink         String?         @db.VarChar(200)
+  state           String?         @db.VarChar(100)
+  totalFriends    Int?
+  previousDay     Int?
+  acceptedFriends Int?
+  pendingAds      Int?
+  hourAds         Int?
+  profileAdsPower Int?
+  notes      String?
+  accessCode      String?         @db.VarChar(100)
+  proxyExpDate    DateTime?       @db.Date
+  lastUpdated     DateTime  @default(now())
+  cupidBot        CupidBot?
+  model           Model     @relation(fields: [modelId], references: [id])
+  modelId         String
+  server          Server    @relation(fields: [serverId], references: [id])
+  serverId        String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model CupidBot {
+  id                String           @id @default(uuid())
+  twitterAccountId  String?          @unique
+  redditAccountId   String?          @unique
+  snapchatAccountId String?          @unique
+  status            String?          @db.VarChar(20)
+  lastRunDate       DateTime?
+  totalMessagesSent Int?
+  totalResponses    Int?
+  conversionRate    Decimal?         @db.Decimal(5, 2)
+  twitterAccount    TwitterAccount?  @relation(fields: [twitterAccountId], references: [id])
+  redditAccount     RedditAccount?   @relation(fields: [redditAccountId], references: [id])
+  snapchatAccount   SnapchatAccount? @relation(fields: [snapchatAccountId], references: [id])
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+}
+
+model Server {
+  id               String            @id @default(uuid())
+  deviceId         String            @unique
+  name             String
+  hostname         String
+  primaryIp        String?
+  status           ServerStatus
+  powerStatus      String
+  deviceType       String
+  location         Json
+  createdDate      DateTime
+  lastRefreshDate  DateTime          @updatedAt
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  twitterAccounts  TwitterAccount[]
+  redditAccounts   RedditAccount[]
+  snapchatAccounts SnapchatAccount[]
+}
+
+model UnusedProxy {
+  id                String   @id @default(uuid())
+  type              String
+  purpose           String
+  country           String
+  billingCycleStart DateTime
+  billingCycleEnd   DateTime
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+enum ServerStatus {
+  RUNNING
+  DOWN
+  WORKINPROGRESS
+}
+
+enum ServerQuality {
+  FAST
+  MEDIUM
+  SLOW
+}

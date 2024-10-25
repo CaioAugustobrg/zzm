@@ -10,7 +10,6 @@ const fs_1 = __importDefault(require("fs"));
 const browser_controller_1 = require("./browser-controller");
 const puppeteer_extra_1 = __importDefault(require("puppeteer-extra"));
 const puppeteer_extra_plugin_stealth_1 = __importDefault(require("puppeteer-extra-plugin-stealth"));
-const verify_bot_status_1 = require("../../application/usecases/verify-bot-status");
 const open_browser_1 = require("../../application/usecases/open-browser");
 const promises_1 = require("node:timers/promises");
 const close_browser_1 = require("../../application/usecases/close-browser");
@@ -47,7 +46,10 @@ function openCsvFile(filePath) {
     });
 }
 class ProfileController {
-    constructor() {
+    constructor(verifyProfiles, profilePageHandler, openBrowserAndGetUrl) {
+        this.verifyProfiles = verifyProfiles;
+        this.profilePageHandler = profilePageHandler;
+        this.openBrowserAndGetUrl = openBrowserAndGetUrl;
         this.browserController = new browser_controller_1.BrowserController(new open_browser_1.OpenBrowserUseCase(), new close_browser_1.CloseBrowserUseCase());
     }
     async findProfile(request, response) {
@@ -63,12 +65,12 @@ class ProfileController {
             for (const userId of userIds) {
                 try {
                     logWithColor(`Running: ${userId}`, 'blue');
-                    const puppeteerUrl = await this.openBrowserAndGetUrl(userId);
+                    const puppeteerUrl = await this.openBrowserAndGetUrl.handle(userId);
                     const browser = await puppeteer_extra_1.default.connect({
                         browserWSEndpoint: puppeteerUrl,
                         defaultViewport: null
                     });
-                    const initialResult = await this.verifyProfiles({ profileId: userId, url: puppeteerUrl }, userIds, socialMedia);
+                    const initialResult = await this.verifyProfiles.handle({ profileId: userId, url: puppeteerUrl }, userIds, socialMedia);
                     if (initialResult) {
                         notRunningProfiles.push(...initialResult.notRunningProfilesAfterVerification);
                         if (initialResult.notRunningProfilesAfterVerification.length === 0) {
@@ -96,64 +98,6 @@ class ProfileController {
             console.error('Error in findAllProfiles:', error.message);
             logger_1.default.error('Error in findAllProfiles:', error.stack);
             return;
-        }
-    }
-    async openBrowserAndGetUrl(userId) {
-        try {
-            const data = await this.browserController.OpenBrowser(userId);
-            //  console.log('OpenBrowser response data:', data);
-            if (!data || !data.data || !data.data.ws || !data.data.ws.puppeteer) {
-                throw new Error(`Invalid response structure for user ID ${userId}`);
-            }
-            return data.data.ws.puppeteer;
-        }
-        catch (error) {
-            console.error(`Error opening browser for user ID ${userId}: ${error.message}`);
-            logger_1.default.error(`Error opening browser for user ID ${userId}: ${error.stack}`);
-            throw error;
-        }
-    }
-    async handleProfilePages(browser, socialMedia, userId, notRunningProfiles) {
-        const targetUrl = socialMedia === 'reddit' ? process.env.REDDIT_URL : process.env.TWITTER_URL;
-        try {
-            const pages = await browser.pages();
-            for (let page of pages) {
-                if (!page.url().startsWith(targetUrl)) {
-                    await page.close();
-                }
-            }
-            const pageURL = await browser.newPage();
-            await pageURL.bringToFront();
-            await pageURL.goto(targetUrl, { waitUntil: 'load' });
-            let verifyCupidBot = new verify_bot_status_1.PageHandler(pageURL);
-            const response = await verifyCupidBot.handlePage(targetUrl, userId);
-            if (response !== 'running ok') {
-                notRunningProfiles.push({ profileId: response, url: browser.wsEndpoint() });
-            }
-        }
-        catch (error) {
-            notRunningProfiles.push({ profileId: userId, url: browser.wsEndpoint() });
-            // if (error.name === )
-            console.error(`Error handling profile pages for user ${userId}: ${error.message}`);
-            logger_1.default.error(`Error handling profile pages for user ${userId}: ${error.stack}`);
-        }
-        await (0, promises_1.setTimeout)(3000);
-    }
-    async verifyProfiles(profileInfo, ids, socialMedia) {
-        let notRunningProfilesAfterVerification = [];
-        try {
-            const puppeteerUrl = await this.openBrowserAndGetUrl(profileInfo.profileId);
-            const browser = await puppeteer_extra_1.default.connect({
-                browserWSEndpoint: puppeteerUrl,
-                defaultViewport: ({ height: 1200, width: 1920 })
-            });
-            await this.handleProfilePages(browser, socialMedia, profileInfo.profileId, notRunningProfilesAfterVerification);
-            return { message: 'Verificação de perfil concluída com sucesso', notRunningProfilesAfterVerification };
-        }
-        catch (error) {
-            console.error(`Error verifying profiles for user ID ${profileInfo.profileId}: ${error.message}`);
-            logger_1.default.error(`Error verifying profiles for user ID ${profileInfo.profileId}: ${error.stack}`);
-            return { notRunningProfilesAfterVerification };
         }
     }
     async saveToCsv(notRunningProfiles, filePath) {

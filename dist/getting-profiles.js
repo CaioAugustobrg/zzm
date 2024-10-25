@@ -10,7 +10,7 @@ const axios_1 = __importDefault(require("axios"));
 const winston_1 = __importDefault(require("winston"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-const API_KEY = process.env.API_KEY || "e30d320a165c400f1ef974619fe1ae26";
+const API_KEY = process.env.API_KEY || "c2c3cc9a89c16e91c3126d27ed882b81";
 const API_PORT = process.env.API_PORT || 50325;
 const apiUrl = 'http://local.adspower.net:50333/api/v1/user/list';
 const logger = winston_1.default.createLogger({
