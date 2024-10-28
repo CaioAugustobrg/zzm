@@ -19,6 +19,10 @@ export class ProfilePageHandler {
             }
 
             const pageURL = await browser.newPage();
+            pageURL.setViewport({
+                width: 1780, // Largura desejada
+                height: 720  // Altura desejada
+            })
             await pageURL.bringToFront();
             await pageURL.goto(targetUrl, { waitUntil: 'load' });
 

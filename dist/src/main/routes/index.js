@@ -11,11 +11,11 @@ const router = express_1.default.Router();
 // Use a ProfileFactory para instanciar o ProfileController
 const profileController = profile_factory_1.ProfileFactory.createProfileController();
 const getProfilesIdsByUser = new get_profile_ids_by_user_1.GetProfilesIdsByUser();
-router.post('/get-profiles', async (request, response) => {
+router.post('/cupidbot-verification', async (request, response) => {
     try {
-        const { profilesId, socialMedia } = request.body;
-        console.log(profilesId);
-        const userIds = await getProfilesIdsByUser.handle(profilesId);
+        const { accountsId, socialMedia } = request.body;
+        console.log(accountsId);
+        const userIds = await getProfilesIdsByUser.handle(accountsId);
         let notWorkingProfiles = await profileController.findAllProfiles(userIds.userIds, socialMedia);
         console.log('notWorkingProfiles', notWorkingProfiles);
         response.status(200).json({ message: 'Profiles processed successfully', notWorkingProfiles });

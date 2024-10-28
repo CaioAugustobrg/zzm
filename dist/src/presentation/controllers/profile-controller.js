@@ -54,7 +54,7 @@ class ProfileController {
     }
     async findProfile(request, response) {
     }
-    async findAllProfiles(userIds, socialMedia) {
+    async findAllProfiles(accountsId, socialMedia) {
         logWithColor('⚠️ **Make sure the Cupid Bot extension is running on ADS POWER.**\n' +
             'If it’s not, press CTRL + C to stop, enable the extension, then run `npm start` and press ENTER.', 'yellow');
         const targetPage = 'https://x.com/messages';
@@ -62,15 +62,15 @@ class ProfileController {
         let notRunningProfiles = [];
         let runningProfiles = [];
         try {
-            for (const userId of userIds) {
+            for (const userId of accountsId) {
                 try {
                     logWithColor(`Running: ${userId}`, 'blue');
                     const puppeteerUrl = await this.openBrowserAndGetUrl.handle(userId);
                     const browser = await puppeteer_extra_1.default.connect({
                         browserWSEndpoint: puppeteerUrl,
-                        defaultViewport: null
+                        defaultViewport: ({ height: 1200, width: 1920 })
                     });
-                    const initialResult = await this.verifyProfiles.handle({ profileId: userId, url: puppeteerUrl }, userIds, socialMedia);
+                    const initialResult = await this.verifyProfiles.handle({ profileId: userId, url: puppeteerUrl }, accountsId, socialMedia);
                     if (initialResult) {
                         notRunningProfiles.push(...initialResult.notRunningProfilesAfterVerification);
                         if (initialResult.notRunningProfilesAfterVerification.length === 0) {

@@ -18,7 +18,7 @@ export class BrowserManager {
         
       ]
     });
-    this.page = await this.browser.newPage();
+    this.page = await this.browser.newPage()
   }
 
   async navigate(url: any) {
@@ -26,6 +26,7 @@ export class BrowserManager {
       throw new Error('Browser not launched. Call launchBrowser() first.');
     }
     await this.page.goto(url);
+    
   }
 
   async closeBrowser() {
